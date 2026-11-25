@@ -39,41 +39,46 @@ Setiap alat disimpan sebagai satu objek JSON di S3 dengan key `equipment/{id}.js
 Lihat [deployment/deployment-plan.md](deployment/deployment-plan.md)
 
 ## Cara mereproduksi
-1. Buat bucket S3 (region us-east-1) dengan Block Public Access tetap aktif.
-2. Buat fungsi Lambda dari `lambda/lambda_function.py` dengan role LabRole,
+1. Buat bucket S3 (region `us-east-1`) dengan Block Public Access tetap aktif.
+2. Buat fungsi Lambda dari `lambda/lambda_function.py` dengan role `LabRole`,
    lalu set environment variable `BUCKET_NAME=<nama-bucket>`.
-3. Aktifkan Function URL pada fungsi Lambda tersebut.
-4. Uji dengan curl (contoh di bawah).
+3. Aktifkan Function URL pada fungsi Lambda tersebut (Auth type: `NONE`).
+4. Uji dengan `curl` (contoh di bawah).
 
 ## Contoh pengujian
-Ganti `<FUNCTION_URL>` dengan URL Function URL (tanpa garis miring di akhir).
+Endpoint aktif yang digunakan pada saat pengujian:
+`https://so73vqs5eeozpb3ocbz5hgxpue0mmsum.lambda-url.us-east-1.on.aws` *(catatan: URL bersifat sementara mengikuti sesi AWS Learner Lab; perlu pergantian terhadap `<FUNCTION_URL>` jika melakukan deployment ulang)*.
 
 ```bash
 # Create
-curl -X POST <FUNCTION_URL>/equipment -H "Content-Type: application/json" \
-  -d '{"id":"eq-001","name":"Proyektor Epson","category":"Elektronik","status":"available"}'
+curl -i -X POST "[https://so73vqs5eeozpb3ocbz5hgxpue0mmsum.lambda-url.us-east-1.on.aws/equipment](https://so73vqs5eeozpb3ocbz5hgxpue0mmsum.lambda-url.us-east-1.on.aws/equipment)" \
+  -H "Content-Type: application/json" \
+  -d '{"id":"eq-001","name":"Proyektor Epson EB-X500","category":"elektronik"}'
 
 # Read (daftar dan detail)
-curl <FUNCTION_URL>/equipment
-curl <FUNCTION_URL>/equipment/eq-001
+curl -i "[https://so73vqs5eeozpb3ocbz5hgxpue0mmsum.lambda-url.us-east-1.on.aws/equipment](https://so73vqs5eeozpb3ocbz5hgxpue0mmsum.lambda-url.us-east-1.on.aws/equipment)"
+curl -i "[https://so73vqs5eeozpb3ocbz5hgxpue0mmsum.lambda-url.us-east-1.on.aws/equipment/eq-001](https://so73vqs5eeozpb3ocbz5hgxpue0mmsum.lambda-url.us-east-1.on.aws/equipment/eq-001)"
 
 # Update
-curl -X PUT <FUNCTION_URL>/equipment/eq-001 -H "Content-Type: application/json" \
-  -d '{"status":"borrowed","borrower":"Gilbert","due_date":"2026-12-01"}'
+curl -i -X PUT "[https://so73vqs5eeozpb3ocbz5hgxpue0mmsum.lambda-url.us-east-1.on.aws/equipment/eq-001](https://so73vqs5eeozpb3ocbz5hgxpue0mmsum.lambda-url.us-east-1.on.aws/equipment/eq-001)" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"borrowed","borrower":"Gilbert Nainggolan","borrowed_at":"2026-11-26","due_date":"2026-11-30"}'
 
 # Delete
-curl -X DELETE <FUNCTION_URL>/equipment/eq-001
+curl -i -X DELETE "[https://so73vqs5eeozpb3ocbz5hgxpue0mmsum.lambda-url.us-east-1.on.aws/equipment/eq-001](https://so73vqs5eeozpb3ocbz5hgxpue0mmsum.lambda-url.us-east-1.on.aws/equipment/eq-001)"
 ```
+
+Hasil pengujian lengkap dapat dilihat di [docs/evidence/README.md](docs/evidence/README.md).
 
 ## Status
 - [x] Repo dibuat
 - [x] Design brief
 - [x] Rencana deployment
 - [x] Diagram arsitektur diunggah
-- [ ] Bucket S3
-- [ ] Lambda
-- [ ] Function URL
-- [ ] Bukti uji koneksi (docs/evidence/)
+- [x] Bucket S3 (`equipment-loan-gshn`)
+- [x] Lambda (`equipment-handler`)
+- [x] Function URL
+- [x] Bukti uji koneksi ([docs/evidence/](docs/evidence/README.md))
 
 ## Catatan keamanan
-Tidak ada kredensial AWS di repository ini.
+Tidak ada kredensial AWS (Access Key maupun Secret Key) di repository ini.
