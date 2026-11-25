@@ -6,28 +6,30 @@
 - Peran IAM: LabRole (bawaan Learner Lab)
 
 ## Urutan deployment
-1. **DynamoDB**
-   - Tabel: `Equipment`
-   - Partition key: `id` (String)
-   - Mode kapasitas: On-demand
+1. **S3**
+   - Bucket: `<nama-bucket-unik>` (nama bucket harus unik secara global)
+   - Block Public Access: aktif (bucket privat)
+   - Objek data disimpan dengan prefix `equipment/`
 2. **Lambda**
    - Nama fungsi: `equipment-handler`
    - Runtime: Python 3.x
    - Execution role: LabRole
-   - Environment variable: `TABLE_NAME=Equipment`
-3. **API Gateway (HTTP API)**
-   - Route: POST /equipment, GET /equipment, GET /equipment/{id},
-     PUT /equipment/{id}, DELETE /equipment/{id}
-   - Integrasi: Lambda proxy ke `equipment-handler`
+   - Timeout: 10 detik (bawaan 3 detik terlalu singkat)
+   - Environment variable: `BUCKET_NAME=<nama-bucket-unik>`
+3. **Function URL**
+   - Dibuat dari tab Configuration pada fungsi Lambda
+   - Auth type: NONE (untuk pengujian)
+   - Satu URL untuk semua route; kode Lambda memilah method dan path
 4. **Pengujian**
    - Uji tiap endpoint dengan curl/Postman
    - Cek log di CloudWatch Logs
 
 ## Pengelolaan biaya
-- DynamoDB on-demand dan Lambda hanya menagih sesuai pemakaian.
+- Lambda dan S3 hanya menagih sesuai pemakaian.
 - Tidak memakai EC2, RDS, NAT Gateway, atau Load Balancer.
 - Resource dihapus jika tidak diperlukan lagi.
 
 ## Verifikasi
-- Screenshot: tabel DynamoDB, konfigurasi Lambda, route API Gateway,
-  output curl, dan log CloudWatch (disimpan di docs/evidence/).
+- Screenshot: bucket S3 beserta objeknya, konfigurasi Lambda,
+  Function URL, output curl, dan log CloudWatch
+  (disimpan di docs/evidence/).
