@@ -8,7 +8,7 @@ Peminjaman alat: mencatat alat, status ketersediaan, dan peminjamnya.
 
 ## Arsitektur
 Client → API Gateway → Lambda → DynamoDB (+ CloudWatch Logs)
-Diagram: docs/architecture.png
+Diagram: ![Arsitektur](docs/architecture.png)
 
 ## Entitas
 Equipment: id, name, category, status, borrower, borrowed_at, due_date
