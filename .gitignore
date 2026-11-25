@@ -1,0 +1,14 @@
+# Kredensial (JANGAN PERNAH di-commit)
+.env
+*.pem
+credentials
+.aws/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Lain-lain
+.DS_Store
+*.zip
