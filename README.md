@@ -1,4 +1,14 @@
-# Equipment Loan API
+<h1 align="center">ARSITEKTUR LAYANAN PEMINJAMAN BARANG</h1>
+<p align="center">
+  <strong>Komputasi Awan · AWS Learner Lab · Track C</strong>
+</p>
+
+<p align="center">
+  <strong>GILBERT S. H. NAINGGOLAN (GSHN)</strong><br>
+  NIM 24/543841/TK/60447 · UGM/FT/DTETI/TIF
+</p>
+
+# Equipment Loan
 
 Aplikasi peminjaman alat berbasis serverless di AWS.
 Track C (Serverless) - Tugas Individu Komputasi Awan, Week 12.
