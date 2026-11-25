@@ -10,21 +10,27 @@ melihat daftar dan detail alat, memperbarui status peminjaman, serta
 menghapus alat yang tidak dipakai lagi.
 
 ## 2. Track yang dipilih
-Track C - Serverless: API Gateway + AWS Lambda + Amazon DynamoDB.
+Track C - Serverless: Lambda Function URL + AWS Lambda + Amazon S3.
 
 Alasan pemilihan:
-- Data hanya satu entitas tanpa relasi kompleks, sehingga cocok untuk
-  DynamoDB.
+- Data hanya satu entitas tanpa relasi kompleks, sehingga cukup disimpan
+  sebagai objek JSON.
 - Tidak perlu mengelola server maupun jaringan (VPC).
 - Biaya mengikuti pemakaian, sehingga hemat untuk budget Learner Lab
   yang tidak dapat di-reset.
 
+### Perubahan desain
+Rancangan awal memakai API Gateway dan DynamoDB. Kedua layanan itu tidak
+tersedia di sandbox AWS yang digunakan, sehingga diganti dengan Lambda
+Function URL (endpoint HTTPS) dan S3 (penyimpanan data). Entitas dan
+endpoint CRUD tidak berubah.
+
 ## 3. Entitas data
-Equipment
+Equipment, disimpan sebagai objek JSON di S3 dengan key `equipment/{id}.json`.
 
 | Atribut | Tipe | Keterangan |
 |---|---|---|
-| id | String (partition key) | Pengenal unik, contoh: eq-001 |
+| id | String | Pengenal unik, contoh: eq-001 (menjadi nama objek) |
 | name | String | Nama alat |
 | category | String | Kategori alat |
 | status | String | available / borrowed |
@@ -33,6 +39,9 @@ Equipment
 | due_date | String | Batas tanggal kembali |
 
 ## 4. Endpoint CRUD
+Function URL hanya satu alamat, sehingga pemilihan operasi dilakukan di
+dalam kode Lambda berdasarkan method dan path.
+
 | Operasi | Method | Path | Fungsi |
 |---|---|---|---|
 | Create | POST | /equipment | Menambah alat baru |
@@ -41,17 +50,21 @@ Equipment
 | Delete | DELETE | /equipment/{id} | Menghapus alat |
 
 ## 5. Arsitektur dan alur data
-Client -> API Gateway -> Lambda -> DynamoDB, dengan log di CloudWatch.
-1. Client mengirim request HTTPS ke API Gateway.
-2. API Gateway meneruskan request ke fungsi Lambda (proxy integration).
-3. Lambda menjalankan operasi CRUD pada tabel DynamoDB `Equipment`.
-4. Hasil dikembalikan sebagai JSON melalui API Gateway.
+Client -> Function URL -> Lambda -> S3, dengan log di CloudWatch.
+1. Client mengirim request HTTPS ke Function URL.
+2. Function URL meneruskan request ke fungsi Lambda.
+3. Lambda membaca, menulis, atau menghapus objek JSON di bucket S3.
+4. Hasil dikembalikan sebagai JSON ke client.
 Diagram: docs/architecture.png
 
 ## 6. IAM dan keamanan
 - Lambda memakai execution role LabRole (bawaan Learner Lab) dengan
-  izin ke DynamoDB.
-- Komunikasi client melalui HTTPS.
+  izin ke S3 dan CloudWatch Logs.
+- Bucket S3 bersifat privat (Block Public Access aktif); hanya Lambda
+  yang mengaksesnya.
+- Function URL memakai auth type NONE agar mudah diuji dengan curl.
+  Konsekuensinya endpoint dapat dipanggil siapa pun yang mengetahui URL-nya,
+  sehingga URL tidak dipublikasikan di repository.
 - Tidak ada kredensial di dalam repository.
 - Tidak memakai VPC karena seluruh layanan adalah managed service.
 
@@ -60,5 +73,5 @@ Lihat deployment/deployment-plan.md
 
 ## 8. Rencana pengujian dan bukti
 Uji tiap endpoint dengan curl atau Postman, lalu lampirkan screenshot
-tabel DynamoDB, konfigurasi Lambda, route API Gateway, output uji,
-dan log CloudWatch di docs/evidence/.
+bucket S3, konfigurasi Lambda, Function URL, output uji, dan log
+CloudWatch di docs/evidence/.
